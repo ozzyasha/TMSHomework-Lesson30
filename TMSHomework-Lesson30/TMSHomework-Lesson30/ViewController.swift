@@ -11,10 +11,8 @@ class ViewController: UIViewController {
     
     private enum Constants {
         static let gameLabelFrameWidth: CGFloat = 280
-        static let gameLabelFrameHeight: CGFloat = 50
         
         static let gameDescriptionFrameWidth: CGFloat = 300
-        static let gameDescriptionFrameHeight: CGFloat = 300
         
         static let guessNumberTextFieldFrameWidth: CGFloat = 300
         static let guessNumberTextFieldFrameHeight: CGFloat = 50
@@ -23,10 +21,8 @@ class ViewController: UIViewController {
         static let checkButtonFrameHeight: CGFloat = 50
         
         static let numberOfAttemptsFrameWidth: CGFloat = 110
-        static let numberOfAttemptsFrameHeight: CGFloat = 25
         
         static let guessedNumbersLabelFrameWidth: CGFloat = 300
-        static let guessedNumbersLabelFrameHeight: CGFloat = 25
     }
     
     var randomNumber = Int(arc4random_uniform(101))
@@ -57,7 +53,6 @@ class ViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             label.widthAnchor.constraint(equalToConstant: Constants.gameLabelFrameWidth),
-            label.heightAnchor.constraint(equalToConstant: Constants.gameLabelFrameHeight)
         ])
         
         return label
@@ -123,7 +118,6 @@ class ViewController: UIViewController {
         gameDescriptionTextView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             gameDescriptionTextView.widthAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameWidth),
-            gameDescriptionTextView.heightAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameHeight)
         ])
         
         gameDescriptionTextViewYAxisAnchor = gameDescriptionTextView.bottomAnchor
@@ -140,11 +134,9 @@ class ViewController: UIViewController {
     private func loadFromUserDefaults() {
         if let numberOfAttemptsLabelTextUD = userDefaults.string(forKey: "numberOfAttemptsLabelText") {
             numberOfAttemptsLabel.text = numberOfAttemptsLabelTextUD
-            print(numberOfAttemptsLabelTextUD)
         }
         
         if let numberOfAttemptsUD = userDefaults.object(forKey: "numberOfAttempts") {
-            print(numberOfAttemptsUD)
             numberOfAttempts = numberOfAttemptsUD as! Int
         }
         
@@ -154,7 +146,6 @@ class ViewController: UIViewController {
         
         if let randomNumberUD = userDefaults.object(forKey: "randomNumber") {
             randomNumber = randomNumberUD as! Int
-            print(randomNumberUD)
         }
         
         if let resultLabelTextUD = userDefaults.string(forKey: "resultLabelText") {
@@ -171,7 +162,6 @@ class ViewController: UIViewController {
         numberOfAttemptsLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             numberOfAttemptsLabel.widthAnchor.constraint(equalToConstant: Constants.numberOfAttemptsFrameWidth),
-            numberOfAttemptsLabel.heightAnchor.constraint(equalToConstant: Constants.numberOfAttemptsFrameHeight)
         ])
         
     }
@@ -185,7 +175,6 @@ class ViewController: UIViewController {
         guessedNumbersLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             guessedNumbersLabel.widthAnchor.constraint(equalToConstant: Constants.guessedNumbersLabelFrameWidth),
-            guessedNumbersLabel.heightAnchor.constraint(equalToConstant: Constants.guessedNumbersLabelFrameHeight)
         ])
     }
     
@@ -212,9 +201,11 @@ class ViewController: UIViewController {
         
         view.addSubview(stackView)
         
+        bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40)
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            bottomStackViewConstraint
         ])
         
         bottomStackViewYAxisAnchor = stackView.bottomAnchor
@@ -289,8 +280,7 @@ class ViewController: UIViewController {
         
         resultLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            resultLabel.widthAnchor.constraint(equalToConstant: Constants.gameLabelFrameWidth),
-            resultLabel.heightAnchor.constraint(equalToConstant: Constants.gameLabelFrameHeight)
+            resultLabel.widthAnchor.constraint(equalToConstant: Constants.gameLabelFrameWidth)
         ])
     }
     
@@ -318,7 +308,7 @@ class ViewController: UIViewController {
     
     @objc func keyboardDisappeared(_ notification: Notification) {
         bottomStackViewConstraint.isActive = false
-        bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: bottomStackViewYAxisAnchor)
+        bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40)
         bottomStackViewConstraint.isActive = true
         
         UIView.animate(withDuration: 0.3) {
