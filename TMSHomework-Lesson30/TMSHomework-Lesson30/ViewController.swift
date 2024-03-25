@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     private enum Constants {
         static let gameLabelFrameWidth: CGFloat = 280
         static let gameLabelFrameHeight: CGFloat = 50
@@ -29,15 +29,19 @@ class ViewController: UIViewController {
         static let guessedNumbersLabelFrameHeight: CGFloat = 25
     }
     
-    var bottomStackConstraint = NSLayoutYAxisAnchor()
-    
     var randomNumber = Int(arc4random_uniform(101))
     
+    var bottomStackViewYAxisAnchor = NSLayoutYAxisAnchor()
     var bottomStackViewConstraint = NSLayoutConstraint()
     
-    private var hStackView = UIStackView()
+    var gameDescriptionTextViewYAxisAnchor = NSLayoutYAxisAnchor()
+    var gameDescriptionTextViewHeightConstraint = NSLayoutConstraint()
+    var gameDescriptionTextViewBottomConstraint = NSLayoutConstraint()
+    var gameDescriptionTextViewTopConstraint = NSLayoutConstraint()
     
-    private var numberOfAttempts = 7
+    private var leadingAlignmentStackView = UIStackView()
+    
+    private var numberOfAttempts: Int = 7
     private var numberOfAttemptsLabel = UILabel()
     
     private var guessedNumbersLabel = UILabel()
@@ -59,34 +63,7 @@ class ViewController: UIViewController {
         return label
     }
     
-    private var gameDescriptionTextView: UITextView {
-        let textView = UITextView()
-    
-        textView.isEditable = false
-        textView.text = ""
-        let text = "Привет! Тут загадано число от 0 до 100.\n\nТвоя задача - отгадать это число, и сделать это максимум за 7 попыток.\n\nЯ скажу тебе, если число будет больше или меньше загаданного.\n\nУдачи!"
-        
-        var charIndex = 0.0
-        for char in text {
-            Timer.scheduledTimer(withTimeInterval: 0.05 * charIndex, repeats: false) { (timer) in
-                textView.text?.append(char)
-            }
-            charIndex += 1
-        }
-        
-        textView.backgroundColor = .black
-        textView.textColor = .white
-        textView.font = UIFont(name: "Swanston", size: 20)
-        textView.textAlignment = .justified
-        
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            textView.widthAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameWidth),
-            textView.heightAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameHeight)
-        ])
-        
-        return textView
-    }
+    private var gameDescriptionTextView = UITextView()
     
     private var guessNumberTextField = UITextField()
     
@@ -111,14 +88,78 @@ class ViewController: UIViewController {
     
     var stackView = UIStackView()
     
+    let userDefaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        setupTextView()
         setupTextField()
         setupResultLabel()
         setupNumberOfAttemptsLabel()
         setupGuessedNumbersLabel()
         setupStackView()
+        loadFromUserDefaults()
+    }
+    
+    private func setupTextView() {
+        gameDescriptionTextView.isEditable = false
+        gameDescriptionTextView.text = ""
+        let text = "Привет! Тут загадано число от 0 до 100.\n\nТвоя задача - отгадать это число, и сделать это максимум за 7 попыток.\n\nЯ скажу тебе, если число будет больше или меньше загаданного.\n\nУдачи!"
+        
+        var charIndex = 0.0
+        for char in text {
+            Timer.scheduledTimer(withTimeInterval: 0.05 * charIndex, repeats: false) { (timer) in
+                self.gameDescriptionTextView.text?.append(char)
+            }
+            charIndex += 1
+        }
+        
+        gameDescriptionTextView.backgroundColor = .black
+        gameDescriptionTextView.textColor = .white
+        gameDescriptionTextView.font = UIFont(name: "Swanston", size: 20)
+        gameDescriptionTextView.textAlignment = .justified
+        
+        gameDescriptionTextView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            gameDescriptionTextView.widthAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameWidth),
+            gameDescriptionTextView.heightAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameHeight)
+        ])
+        
+        gameDescriptionTextViewYAxisAnchor = gameDescriptionTextView.bottomAnchor
+    }
+    
+    private func saveToUserDefaults() {
+        userDefaults.set(numberOfAttemptsLabel.text, forKey: "numberOfAttemptsLabelText")
+        userDefaults.set(numberOfAttempts, forKey: "numberOfAttempts")
+        userDefaults.set(guessedNumbersLabel.text, forKey: "guessedNumbers")
+        userDefaults.set(randomNumber, forKey: "randomNumber")
+        userDefaults.set(resultLabel.text, forKey: "resultLabelText")
+    }
+    
+    private func loadFromUserDefaults() {
+        if let numberOfAttemptsLabelTextUD = userDefaults.string(forKey: "numberOfAttemptsLabelText") {
+            numberOfAttemptsLabel.text = numberOfAttemptsLabelTextUD
+            print(numberOfAttemptsLabelTextUD)
+        }
+        
+        if let numberOfAttemptsUD = userDefaults.object(forKey: "numberOfAttempts") {
+            print(numberOfAttemptsUD)
+            numberOfAttempts = numberOfAttemptsUD as! Int
+        }
+        
+        if let guessedNumbersUD = userDefaults.string(forKey: "guessedNumbers") {
+            guessedNumbersLabel.text = guessedNumbersUD
+        }
+        
+        if let randomNumberUD = userDefaults.object(forKey: "randomNumber") {
+            randomNumber = randomNumberUD as! Int
+            print(randomNumberUD)
+        }
+        
+        if let resultLabelTextUD = userDefaults.string(forKey: "resultLabelText") {
+            resultLabel.text = resultLabelTextUD
+        }
     }
     
     private func setupNumberOfAttemptsLabel() {
@@ -149,19 +190,19 @@ class ViewController: UIViewController {
     }
     
     private func setupStackView() {
-        hStackView.axis = .vertical
-        hStackView.alignment = .leading
-        hStackView.distribution = .fill
-        hStackView.spacing = 10
+        leadingAlignmentStackView.axis = .vertical
+        leadingAlignmentStackView.alignment = .leading
+        leadingAlignmentStackView.distribution = .fill
+        leadingAlignmentStackView.spacing = 10
         
-        hStackView.addArrangedSubview(numberOfAttemptsLabel)
-        hStackView.addArrangedSubview(guessedNumbersLabel)
+        leadingAlignmentStackView.addArrangedSubview(numberOfAttemptsLabel)
+        leadingAlignmentStackView.addArrangedSubview(guessedNumbersLabel)
         
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.spacing = 20
         
-        stackView.addArrangedSubview(hStackView)
+        stackView.addArrangedSubview(leadingAlignmentStackView)
         stackView.addArrangedSubview(gameLabel)
         stackView.addArrangedSubview(gameDescriptionTextView)
         stackView.addArrangedSubview(guessNumberTextField)
@@ -176,7 +217,7 @@ class ViewController: UIViewController {
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        bottomStackConstraint = stackView.bottomAnchor
+        bottomStackViewYAxisAnchor = stackView.bottomAnchor
     }
     
     private func setupTextField() {
@@ -256,6 +297,7 @@ class ViewController: UIViewController {
     @objc func checkButtonTapped() {
         guessNumberTextField.resignFirstResponder()
         compareRandomNumberWithInput()
+        saveToUserDefaults()
     }
     
     @objc func keyboardAppeared(_ notification: Notification) {
@@ -266,13 +308,22 @@ class ViewController: UIViewController {
             bottomStackViewConstraint.isActive = false
             bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -keyboardHeight-20)
             bottomStackViewConstraint.isActive = true
+            
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+            
         }
     }
     
     @objc func keyboardDisappeared(_ notification: Notification) {
         bottomStackViewConstraint.isActive = false
-        bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: bottomStackConstraint)
+        bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: bottomStackViewYAxisAnchor)
         bottomStackViewConstraint.isActive = true
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
     
 }
@@ -296,10 +347,8 @@ extension ViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         compareRandomNumberWithInput()
+        saveToUserDefaults()
         return true
     }
-
+    
 }
-
-//Создайте проект, который будет имитировать любую мини-игру, например, угадай число.
-//Используя UserDefaults, сохраняйте и загружайте игровое состояние, такое как количество очков, уровень и так далее.
