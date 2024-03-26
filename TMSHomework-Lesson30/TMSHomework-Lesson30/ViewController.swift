@@ -10,8 +10,9 @@ import UIKit
 class ViewController: UIViewController {
     
     private enum Constants {
+        static let numberOfAttemptsFrameWidth: CGFloat = 110
+        static let guessedNumbersLabelFrameWidth: CGFloat = 300
         static let gameLabelFrameWidth: CGFloat = 280
-        
         static let gameDescriptionFrameWidth: CGFloat = 300
         
         static let guessNumberTextFieldFrameWidth: CGFloat = 300
@@ -20,27 +21,20 @@ class ViewController: UIViewController {
         static let checkButtonFrameWidth: CGFloat = 300
         static let checkButtonFrameHeight: CGFloat = 50
         
-        static let numberOfAttemptsFrameWidth: CGFloat = 110
-        
-        static let guessedNumbersLabelFrameWidth: CGFloat = 300
+        static let resultLabelWidth: CGFloat = 300
     }
-    
-    var randomNumber = Int(arc4random_uniform(101))
-    
-    var bottomStackViewYAxisAnchor = NSLayoutYAxisAnchor()
-    var bottomStackViewConstraint = NSLayoutConstraint()
-    
-    var gameDescriptionTextViewYAxisAnchor = NSLayoutYAxisAnchor()
-    var gameDescriptionTextViewHeightConstraint = NSLayoutConstraint()
-    var gameDescriptionTextViewBottomConstraint = NSLayoutConstraint()
-    var gameDescriptionTextViewTopConstraint = NSLayoutConstraint()
-    
-    private var leadingAlignmentStackView = UIStackView()
     
     private var numberOfAttempts: Int = 7
     private var numberOfAttemptsLabel = UILabel()
     
     private var guessedNumbersLabel = UILabel()
+    
+    var randomNumber = Int.random(in: 0..<101)
+    
+    var bottomStackViewYAxisAnchor = NSLayoutYAxisAnchor()
+    var bottomStackViewConstraint = NSLayoutConstraint()
+    
+    private var leadingAlignmentStackView = UIStackView()
     
     private var gameLabel: UILabel {
         let label = UILabel()
@@ -88,13 +82,37 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        setupNumberOfAttemptsLabel()
+        setupGuessedNumbersLabel()
         setupTextView()
         setupTextField()
         setupResultLabel()
-        setupNumberOfAttemptsLabel()
-        setupGuessedNumbersLabel()
         setupStackView()
         loadFromUserDefaults()
+    }
+    
+    private func setupNumberOfAttemptsLabel() {
+        numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
+        numberOfAttemptsLabel.textColor = .white
+        numberOfAttemptsLabel.font = UIFont(name: "Swanston", size: 20)
+        numberOfAttemptsLabel.textAlignment = .left
+        
+        numberOfAttemptsLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            numberOfAttemptsLabel.widthAnchor.constraint(equalToConstant: Constants.numberOfAttemptsFrameWidth),
+        ])
+    }
+    
+    private func setupGuessedNumbersLabel() {
+        guessedNumbersLabel.text = "Числа:"
+        guessedNumbersLabel.textColor = .white
+        guessedNumbersLabel.font = UIFont(name: "Swanston", size: 20)
+        guessedNumbersLabel.textAlignment = .left
+        
+        guessedNumbersLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            guessedNumbersLabel.widthAnchor.constraint(equalToConstant: Constants.guessedNumbersLabelFrameWidth),
+        ])
     }
     
     private func setupTextView() {
@@ -119,62 +137,43 @@ class ViewController: UIViewController {
         NSLayoutConstraint.activate([
             gameDescriptionTextView.widthAnchor.constraint(equalToConstant: Constants.gameDescriptionFrameWidth),
         ])
-        
-        gameDescriptionTextViewYAxisAnchor = gameDescriptionTextView.bottomAnchor
     }
     
-    private func saveToUserDefaults() {
-        userDefaults.set(numberOfAttemptsLabel.text, forKey: "numberOfAttemptsLabelText")
-        userDefaults.set(numberOfAttempts, forKey: "numberOfAttempts")
-        userDefaults.set(guessedNumbersLabel.text, forKey: "guessedNumbers")
-        userDefaults.set(randomNumber, forKey: "randomNumber")
-        userDefaults.set(resultLabel.text, forKey: "resultLabelText")
-    }
-    
-    private func loadFromUserDefaults() {
-        if let numberOfAttemptsLabelTextUD = userDefaults.string(forKey: "numberOfAttemptsLabelText") {
-            numberOfAttemptsLabel.text = numberOfAttemptsLabelTextUD
+    private func setupTextField() {
+        guessNumberTextField.delegate = self
+        guessNumberTextField.keyboardType = .numberPad
+        guessNumberTextField.layer.borderWidth = 5
+        guessNumberTextField.layer.borderColor = UIColor.white.cgColor
+        
+        guessNumberTextField.placeholder = "Введите число"
+        if let placeholder = guessNumberTextField.placeholder {
+            guessNumberTextField.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: [NSAttributedString.Key.foregroundColor: UIColor.systemGray])
         }
         
-        if let numberOfAttemptsUD = userDefaults.object(forKey: "numberOfAttempts") {
-            numberOfAttempts = numberOfAttemptsUD as! Int
-        }
+        guessNumberTextField.font = UIFont(name: "Swanston-Bold", size: 35)
+        guessNumberTextField.textAlignment = .center
+        guessNumberTextField.textColor = .white
         
-        if let guessedNumbersUD = userDefaults.string(forKey: "guessedNumbers") {
-            guessedNumbersLabel.text = guessedNumbersUD
-        }
-        
-        if let randomNumberUD = userDefaults.object(forKey: "randomNumber") {
-            randomNumber = randomNumberUD as! Int
-        }
-        
-        if let resultLabelTextUD = userDefaults.string(forKey: "resultLabelText") {
-            resultLabel.text = resultLabelTextUD
-        }
-    }
-    
-    private func setupNumberOfAttemptsLabel() {
-        numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
-        numberOfAttemptsLabel.textColor = .white
-        numberOfAttemptsLabel.font = UIFont(name: "Swanston", size: 20)
-        numberOfAttemptsLabel.textAlignment = .left
-        
-        numberOfAttemptsLabel.translatesAutoresizingMaskIntoConstraints = false
+        guessNumberTextField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            numberOfAttemptsLabel.widthAnchor.constraint(equalToConstant: Constants.numberOfAttemptsFrameWidth),
+            guessNumberTextField.widthAnchor.constraint(equalToConstant: Constants.guessNumberTextFieldFrameWidth),
+            guessNumberTextField.heightAnchor.constraint(equalToConstant: Constants.guessNumberTextFieldFrameHeight)
         ])
         
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardAppeared), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardDisappeared), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    private func setupGuessedNumbersLabel() {
-        guessedNumbersLabel.text = "Числа:"
-        guessedNumbersLabel.textColor = .white
-        guessedNumbersLabel.font = UIFont(name: "Swanston", size: 20)
-        guessedNumbersLabel.textAlignment = .left
+    private func setupResultLabel() {
+        resultLabel.text = ""
+        resultLabel.font = UIFont(name: "Swanston", size: 20)
+        resultLabel.textColor = .white
+        resultLabel.textAlignment = .center
+        resultLabel.numberOfLines = 3
         
-        guessedNumbersLabel.translatesAutoresizingMaskIntoConstraints = false
+        resultLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            guessedNumbersLabel.widthAnchor.constraint(equalToConstant: Constants.guessedNumbersLabelFrameWidth),
+            resultLabel.widthAnchor.constraint(equalToConstant: Constants.resultLabelWidth)
         ])
     }
     
@@ -211,35 +210,41 @@ class ViewController: UIViewController {
         bottomStackViewYAxisAnchor = stackView.bottomAnchor
     }
     
-    private func setupTextField() {
-        guessNumberTextField.delegate = self
-        guessNumberTextField.keyboardType = .numberPad
-        guessNumberTextField.layer.borderWidth = 5
-        guessNumberTextField.layer.borderColor = UIColor.white.cgColor
-        
-        guessNumberTextField.placeholder = "Введите число"
-        if let placeholder = guessNumberTextField.placeholder {
-            guessNumberTextField.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: [NSAttributedString.Key.foregroundColor: UIColor.systemGray])
+    private func saveToUserDefaults() {
+        userDefaults.setValue(numberOfAttemptsLabel.text, forKey: .numberOfAttemptsLabelText)
+        userDefaults.setValue(numberOfAttempts, forKey: .numberOfAttempts)
+        userDefaults.setValue(guessedNumbersLabel.text, forKey: .guessedNumbers)
+        userDefaults.setValue(randomNumber, forKey: .randomNumber)
+        userDefaults.setValue(resultLabel.text, forKey: .resultLabelText)
+    }
+    
+    private func loadFromUserDefaults() {
+        if let numberOfAttemptsLabelTextUD = userDefaults.value(forKey: .numberOfAttemptsLabelText) {
+            numberOfAttemptsLabel.text = numberOfAttemptsLabelTextUD as? String
         }
         
-        guessNumberTextField.font = UIFont(name: "Swanston-Bold", size: 35)
-        guessNumberTextField.textAlignment = .center
-        guessNumberTextField.textColor = .white
+        if let numberOfAttemptsUD = userDefaults.value(forKey: .numberOfAttempts) {
+            numberOfAttempts = numberOfAttemptsUD as! Int
+        }
         
-        guessNumberTextField.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            guessNumberTextField.widthAnchor.constraint(equalToConstant: Constants.guessNumberTextFieldFrameWidth),
-            guessNumberTextField.heightAnchor.constraint(equalToConstant: Constants.guessNumberTextFieldFrameHeight)
-        ])
+        if let guessedNumbersUD = userDefaults.value(forKey: .guessedNumbers) {
+            guessedNumbersLabel.text = guessedNumbersUD as? String
+        }
         
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardAppeared), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardDisappeared), name: UIResponder.keyboardWillHideNotification, object: nil)
+        if let randomNumberUD = userDefaults.value(forKey: .randomNumber) {
+            randomNumber = randomNumberUD as! Int
+        }
+        
+        if let resultLabelTextUD = userDefaults.value(forKey: .resultLabelText) {
+            resultLabel.text = resultLabelTextUD as? String
+        }
     }
     
     private func resetGame() {
-        randomNumber = Int(arc4random_uniform(101))
-        numberOfAttempts = 8
+        randomNumber = Int.random(in: 0..<101)
+        numberOfAttempts = 7
         guessedNumbersLabel.text = "Числа:"
+        numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
     }
     
     private func compareRandomNumberWithInput() {
@@ -250,38 +255,26 @@ class ViewController: UIViewController {
             if inputFromTextField < randomNumber {
                 resultLabel.text = "Число \(inputFromTextField) меньше загаданного"
                 guessNumberTextField.text = ""
+                
+                numberOfAttempts -= 1
+                numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
             } else if inputFromTextField > randomNumber {
                 resultLabel.text = "Число \(inputFromTextField) больше загаданного"
                 guessNumberTextField.text = ""
+                
+                numberOfAttempts -= 1
+                numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
             } else if inputFromTextField == randomNumber {
-                resultLabel.text = "Вы отгадали число. Это \(randomNumber).\nЗагадываю новое число."
+                resultLabel.text = "Вы отгадали число. Это \(randomNumber)\nЗагадываю новое число"
                 guessNumberTextField.text = ""
                 resetGame()
             }
             
-            numberOfAttempts -= 1
-            numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
-            
             if numberOfAttempts < 1 {
-                resultLabel.text = "Попытки закончились!\nЗагадываю новое число."
+                resultLabel.text = "Попытки закончились!\nЭто было число \(randomNumber)\nЗагадываю новое число"
                 resetGame()
             }
-            
         }
-        
-    }
-    
-    private func setupResultLabel() {
-        resultLabel.text = ""
-        resultLabel.font = UIFont(name: "Swanston", size: 20)
-        resultLabel.textColor = .white
-        resultLabel.textAlignment = .center
-        resultLabel.numberOfLines = 2
-        
-        resultLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            resultLabel.widthAnchor.constraint(equalToConstant: Constants.gameLabelFrameWidth)
-        ])
     }
     
     @objc func checkButtonTapped() {
@@ -294,7 +287,6 @@ class ViewController: UIViewController {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             let keyboardHeight = keyboardSize.height
             
-            
             bottomStackViewConstraint.isActive = false
             bottomStackViewConstraint = stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -keyboardHeight-20)
             bottomStackViewConstraint.isActive = true
@@ -302,7 +294,6 @@ class ViewController: UIViewController {
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
             }
-            
         }
     }
     
@@ -315,7 +306,6 @@ class ViewController: UIViewController {
             self.view.layoutIfNeeded()
         }
     }
-    
 }
 
 extension ViewController: UITextFieldDelegate {
@@ -340,5 +330,22 @@ extension ViewController: UITextFieldDelegate {
         saveToUserDefaults()
         return true
     }
+}
+
+extension UserDefaults {
+    enum UserDefaultsKeys: String {
+        case numberOfAttemptsLabelText = "numberOfAttemptsLabelText"
+        case numberOfAttempts = "numberOfAttempts"
+        case guessedNumbers = "guessedNumbers"
+        case randomNumber = "randomNumber"
+        case resultLabelText = "resultLabelText"
+    }
     
+    func setValue(_ value: Any?, forKey key: UserDefaultsKeys) {
+        setValue(value, forKey: key.rawValue)
+    }
+    
+    func value(forKey key: UserDefaultsKeys) -> Any? {
+        value(forKey: key.rawValue)
+    }
 }
