@@ -8,6 +8,10 @@
 import UIKit
 
 class ViewController: UIViewController {
+    var randomNumber = Int.random(in: 0..<101)
+    
+    var bottomStackViewYAxisAnchor = NSLayoutYAxisAnchor()
+    var bottomStackViewConstraint = NSLayoutConstraint()
     
     private enum Constants {
         static let numberOfAttemptsFrameWidth: CGFloat = 110
@@ -25,15 +29,10 @@ class ViewController: UIViewController {
     }
     
     private var numberOfAttempts: Int = 7
+    
+    // MARK: - UI
     private var numberOfAttemptsLabel = UILabel()
-    
     private var guessedNumbersLabel = UILabel()
-    
-    var randomNumber = Int.random(in: 0..<101)
-    
-    var bottomStackViewYAxisAnchor = NSLayoutYAxisAnchor()
-    var bottomStackViewConstraint = NSLayoutConstraint()
-    
     private var leadingAlignmentStackView = UIStackView()
     
     private var gameLabel: UILabel {
@@ -53,7 +52,6 @@ class ViewController: UIViewController {
     }
     
     private var gameDescriptionTextView = UITextView()
-    
     private var guessNumberTextField = UITextField()
     
     var checkButton: UIButton {
@@ -79,6 +77,7 @@ class ViewController: UIViewController {
     
     let userDefaults = UserDefaults.standard
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -91,6 +90,7 @@ class ViewController: UIViewController {
         loadFromUserDefaults()
     }
     
+    // MARK: - Setup views
     private func setupNumberOfAttemptsLabel() {
         numberOfAttemptsLabel.text = "Попыток: \(numberOfAttempts)"
         numberOfAttemptsLabel.textColor = .white
@@ -210,6 +210,7 @@ class ViewController: UIViewController {
         bottomStackViewYAxisAnchor = stackView.bottomAnchor
     }
     
+    // MARK: - Core Methods
     private func saveToUserDefaults() {
         userDefaults.setValue(numberOfAttemptsLabel.text, forKey: .numberOfAttemptsLabelText)
         userDefaults.setValue(numberOfAttempts, forKey: .numberOfAttempts)
@@ -223,16 +224,16 @@ class ViewController: UIViewController {
             numberOfAttemptsLabel.text = numberOfAttemptsLabelTextUD as? String
         }
         
-        if let numberOfAttemptsUD = userDefaults.value(forKey: .numberOfAttempts) {
-            numberOfAttempts = numberOfAttemptsUD as! Int
+        if let numberOfAttemptsUD = userDefaults.value(forKey: .numberOfAttempts) as? Int {
+            numberOfAttempts = numberOfAttemptsUD
         }
         
         if let guessedNumbersUD = userDefaults.value(forKey: .guessedNumbers) {
             guessedNumbersLabel.text = guessedNumbersUD as? String
         }
         
-        if let randomNumberUD = userDefaults.value(forKey: .randomNumber) {
-            randomNumber = randomNumberUD as! Int
+        if let randomNumberUD = userDefaults.value(forKey: .randomNumber) as? Int {
+            randomNumber = randomNumberUD
         }
         
         if let resultLabelTextUD = userDefaults.value(forKey: .resultLabelText) {
@@ -249,7 +250,9 @@ class ViewController: UIViewController {
     
     private func compareRandomNumberWithInput() {
         if let inputFromTextField = Int(guessNumberTextField.text!) {
-            
+            if guessedNumbersLabel.text != "Числа:" {
+                guessedNumbersLabel.text! += ","
+            }
             guessedNumbersLabel.text! += " \(inputFromTextField)"
             
             if inputFromTextField < randomNumber {
@@ -329,23 +332,5 @@ extension ViewController: UITextFieldDelegate {
         compareRandomNumberWithInput()
         saveToUserDefaults()
         return true
-    }
-}
-
-extension UserDefaults {
-    enum UserDefaultsKeys: String {
-        case numberOfAttemptsLabelText = "numberOfAttemptsLabelText"
-        case numberOfAttempts = "numberOfAttempts"
-        case guessedNumbers = "guessedNumbers"
-        case randomNumber = "randomNumber"
-        case resultLabelText = "resultLabelText"
-    }
-    
-    func setValue(_ value: Any?, forKey key: UserDefaultsKeys) {
-        setValue(value, forKey: key.rawValue)
-    }
-    
-    func value(forKey key: UserDefaultsKeys) -> Any? {
-        value(forKey: key.rawValue)
     }
 }

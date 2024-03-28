@@ -14,6 +14,7 @@
 		7A836AE72BADA80D0096EE16 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7A836AE52BADA80D0096EE16 /* LaunchScreen.storyboard */; };
 		7A836AF32BADC9D60096EE16 /* Swanston.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A836AF12BADC9D50096EE16 /* Swanston.ttf */; };
 		7A836AF42BADC9D60096EE16 /* Swanston-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A836AF22BADC9D60096EE16 /* Swanston-Bold.ttf */; };
+		7AD1FEE52BB59A2700700EED /* UserDefaults+statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AD1FEE42BB59A2700700EED /* UserDefaults+statistic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		7A836AE82BADA80D0096EE16 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A836AF12BADC9D50096EE16 /* Swanston.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Swanston.ttf; sourceTree = "<group>"; };
 		7A836AF22BADC9D60096EE16 /* Swanston-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Swanston-Bold.ttf"; sourceTree = "<group>"; };
+		7AD1FEE42BB59A2700700EED /* UserDefaults+statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+statistic.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 				7A836ADA2BADA80C0096EE16 /* AppDelegate.swift */,
 				7A836ADC2BADA80C0096EE16 /* SceneDelegate.swift */,
 				7A836ADE2BADA80C0096EE16 /* ViewController.swift */,
+				7AD1FEE42BB59A2700700EED /* UserDefaults+statistic.swift */,
 				7A836AE32BADA80D0096EE16 /* Assets.xcassets */,
 				7A836AE52BADA80D0096EE16 /* LaunchScreen.storyboard */,
 				7A836AE82BADA80D0096EE16 /* Info.plist */,
@@ -151,6 +154,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7A836ADF2BADA80C0096EE16 /* ViewController.swift in Sources */,
+				7AD1FEE52BB59A2700700EED /* UserDefaults+statistic.swift in Sources */,
 				7A836ADB2BADA80C0096EE16 /* AppDelegate.swift in Sources */,
 				7A836ADD2BADA80C0096EE16 /* SceneDelegate.swift in Sources */,
 			);
